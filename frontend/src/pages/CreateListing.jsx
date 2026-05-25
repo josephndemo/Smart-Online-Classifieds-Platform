@@ -31,7 +31,7 @@ export default function CreateListing() {
             <input type="text" required className="w-full border p-3 rounded-xl" onChange={e => setFormData({...formData, title: e.target.value})} />
           </div>
           <div>
-            <label className="block text-sm font-semibold mb-1">Price ($)</label>
+            <label className="block text-sm font-semibold mb-1">Price (Ksh.)</label>
             <input type="number" step="0.01" required className="w-full border p-3 rounded-xl" onChange={e => setFormData({...formData, price: e.target.value})} />
           </div>
           <div>

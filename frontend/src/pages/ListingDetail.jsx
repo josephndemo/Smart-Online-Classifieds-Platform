@@ -81,7 +81,7 @@ export default function ListingDetail() {
             </div>
 
             <h1 className="text-3xl font-extrabold text-gray-900 mb-2 leading-tight">{listing.title}</h1>
-            <p className="text-2xl font-black text-gray-900 mb-6">${listing.price.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+            <p className="text-2xl font-black text-gray-900 mb-6">Ksh.{listing.price.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
             
             <hr className="border-gray-100 my-4" />
             

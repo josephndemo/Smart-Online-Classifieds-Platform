@@ -69,7 +69,7 @@ export default function Dashboard() {
               {myListings.map(item => (
                 <tr key={item.id} className="border-b hover:bg-slate-50">
                   <td className="p-4 font-bold text-gray-800">{item.title}</td>
-                  <td className="p-4">${item.price}</td>
+                  <td className="p-4">Ksh.{item.price}</td>
                   <td className="p-4">
                     <span className={`text-xs px-2.5 py-0.5 rounded font-medium ${item.status === 'Available' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}`}>
                       {item.status}
@@ -97,7 +97,7 @@ export default function Dashboard() {
             <div key={fav.id} className="p-4 border bg-white rounded-xl shadow-sm flex justify-between items-center">
               <div>
                 <p className="font-bold text-gray-900">{fav.title}</p>
-                <p className="text-sm text-indigo-600 font-semibold">${fav.price}</p>
+                <p className="text-sm text-indigo-600 font-semibold">Ksh{fav.price}</p>
               </div>
               <button onClick={() => navigate(`/listings/${fav.id}`)} className="text-xs text-indigo-600 hover:underline">View</button>
             </div>

@@ -80,7 +80,7 @@ export default function Home() {
                 </div>
                 <div>
                   <div className="flex justify-between items-center mt-2 mb-3">
-                    <span className="text-xl font-extrabold text-gray-900">${item.price.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
+                    <span className="text-xl font-extrabold text-gray-900">Ksh.{item.price.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                     <span className={`text-xs px-2.5 py-1 font-semibold rounded-full ${item.status === 'Available' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
                       {item.status}
                     </span>
