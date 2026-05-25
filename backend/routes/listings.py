@@ -21,7 +21,7 @@ def get_listings():
 
 @listings_bp.route('/<int:id>', methods=['GET'])
 def get_listing_detail(id):
-    listing = Listing.query.get_or_400(id)
+    listing = Listing.query.get_or_404(id) # <-- Fixed to get_or_404
     return jsonify(listing.to_dict()), 200
 
 @listings_bp.route('', methods=['POST'])

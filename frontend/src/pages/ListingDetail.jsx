@@ -1,73 +1,117 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
 export default function ListingDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [listing, setListing] = useState(null);
-  const [message, setMessage] = useState('Hello, I am interested in this listing. Is it available?');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [message, setMessage] = useState('Is this item still available?');
   const [statusMsg, setStatusMsg] = useState('');
+  
+  // Extract user tokens for seller notification queries
   const token = localStorage.getItem('token');
 
   useEffect(() => {
-    axios.get(`http://localhost:5001/api/listings/${id}`)
-      .then(res => setListing(res.data))
-      .catch(() => navigate('/'));
+    const fetchListingDetail = async () => {
+      try {
+        const res = await axios.get(`http://localhost:5001/api/listings/${id}`);
+        setListing(res.data);
+        setLoading(false);
+      } catch (err) {
+        setError(err.response?.data?.msg || 'Failed to retrieve entry details.');
+        setLoading(false);
+      }
+    };
+    fetchListingDetail();
   }, [id]);
 
   const handleInquiry = async (e) => {
     e.preventDefault();
-    if (!token) return navigate('/login');
+    if (!token) {
+      setStatusMsg('Please log in or create an account to drop a transaction message line.');
+      setTimeout(() => navigate('/login'), 2000);
+      return;
+    }
+
     try {
+      // Secure backtick string structure safely connecting to backend endpoint
       const res = await axios.post(`http://localhost:5001/api/listings/${id}/inquiry`, { message }, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setStatusMsg(res.data.msg);
     } catch (err) {
-      setStatusMsg('Error processing transaction pipeline initialization operations.');
+      setStatusMsg('Error processing inquiry transaction.');
     }
   };
 
-  const handleFavorite = async () => {
-    if (!token) return navigate('/login');
-    try {
-      await axios.post(`http://localhost:5001/api/listings/${id}/favorite`, {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      alert('Updated application configuration wishlist parameters!');
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  if (!listing) return <div className="text-center py-20 font-medium">Loading catalog parameters...</div>;
+  if (loading) return <div className="text-center py-12 text-gray-500 font-medium">Loading asset components...</div>;
+  if (error) return <div className="text-center py-12 text-red-500 font-medium">{error}</div>;
+  if (!listing) return <div className="text-center py-12 text-gray-500">Classified listing could not be found.</div>;
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div>
-        <img src={listing.image_url} alt={listing.title} className="w-full h-96 object-cover rounded-2xl border shadow-sm" />
-      </div>
-      <div>
-        <span className="text-xs font-bold uppercase text-indigo-600 tracking-wider bg-indigo-50 px-3 py-1 rounded-full">{listing.category}</span>
-        <h1 className="text-3xl font-black mt-2 text-gray-900">{listing.title}</h1>
-        <p className="text-2xl font-extrabold text-indigo-600 mt-2">${listing.price.toLocaleString()}</p>
-        <div className="mt-4 border-t border-b py-4 my-4">
-          <p className="text-sm font-semibold text-gray-500">Seller Identity Details:</p>
-          <p className="text-base font-bold text-gray-800">{listing.owner.username} ({listing.owner.email})</p>
-        </div>
-        <p className="text-gray-700 leading-relaxed">{listing.description}</p>
-        
-        <div className="mt-6 flex gap-4">
-          <button onClick={handleFavorite} className="border border-slate-300 hover:bg-gray-50 px-4 py-3 rounded-xl font-medium">❤️ Save Item</button>
+    <div>
+      {/* Return to Catalog Utility Navigation Links */}
+      <Link to="/" className="inline-flex items-center text-sm font-semibold text-indigo-600 hover:text-indigo-700 mb-6 group transition">
+        ← Back to Marketplace Catalog
+      </Link>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 bg-white p-6 md:p-8 rounded-3xl border border-gray-100 shadow-xl">
+        {/* Listing Media Left Compartment */}
+        <div>
+          <img 
+            src={listing.image_url || 'https://images.unsplash.com/photo-1531403009284-440f080d1e12?q=80&w=500'} 
+            alt={listing.title} 
+            className="w-full rounded-2xl h-[400px] object-cover bg-gray-50 border border-gray-100 shadow-sm"
+          />
         </div>
 
-        <form onSubmit={handleInquiry} className="mt-8 bg-slate-50 p-4 border rounded-xl">
-          <h3 className="font-bold text-lg mb-2">Message Seller</h3>
-          {statusMsg && <p className="text-sm font-semibold text-indigo-600 mb-2">{statusMsg}</p>}
-          <textarea rows="3" className="w-full border p-2.5 rounded-lg text-sm mb-3" value={message} onChange={e => setMessage(e.target.value)}></textarea>
-          <button className="bg-slate-900 text-white font-semibold text-sm px-4 py-2 rounded-lg hover:bg-slate-800">Dispatch Request Notification</button>
-        </form>
+        {/* Info Layout Right Context Panels */}
+        <div className="flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <span className="px-3 py-1 text-xs font-bold uppercase tracking-wide bg-indigo-50 text-indigo-700 rounded-lg">
+                {listing.category}
+              </span>
+              <span className={`px-3 py-1 text-xs font-bold rounded-full ${listing.status === 'Available' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'}`}>
+                ● {listing.status}
+              </span>
+            </div>
+
+            <h1 className="text-3xl font-extrabold text-gray-900 mb-2 leading-tight">{listing.title}</h1>
+            <p className="text-2xl font-black text-gray-900 mb-6">${listing.price.toLocaleString(undefined, {minimumFractionDigits: 2})}</p>
+            
+            <hr className="border-gray-100 my-4" />
+            
+            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider mb-2">Item Description</h3>
+            <p className="text-gray-600 leading-relaxed text-base mb-6 whitespace-pre-line">{listing.description}</p>
+          </div>
+
+          {/* Secure Seller Contact Interface Channel */}
+          <div className="bg-gray-50 p-5 rounded-2xl border border-gray-100">
+            <h3 className="font-bold text-gray-900 text-lg mb-2">Contact Owner Regarding This Ad</h3>
+            {statusMsg && (
+              <p className={`text-sm font-semibold p-2.5 rounded-xl mb-3 ${statusMsg.includes('successfully') ? 'bg-green-50 text-green-700' : 'bg-amber-50 text-amber-700'}`}>
+                {statusMsg}
+              </p>
+            )}
+            
+            <form onSubmit={handleInquiry} className="space-y-3">
+              <textarea 
+                rows="3"
+                required
+                className="w-full border p-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white text-sm"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+              <button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold p-3 rounded-xl shadow-md hover:shadow transition text-sm">
+                Send Direct Message
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );
