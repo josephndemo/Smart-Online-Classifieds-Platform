@@ -18,7 +18,7 @@ export default function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/create" element={<CreateListing />} />
+            <Route path="/create-listing" element={<CreateListing />} />
             <Route path="/listings/:id" element={<ListingDetail />} /> {/* <-- Dynamic route setup */}
           </Routes>
         </main>

@@ -1,7 +1,9 @@
 from flask import Blueprint, request, jsonify
-from extensions import db
+from extensions import db, mail # <-- Imported mail instance
 from models import User
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from flask_mail import Message # <-- Imported Message envelope class
+from datetime import datetime
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -31,6 +33,24 @@ def login():
         return jsonify({"msg": "Invalid email or password"}), 401
         
     access_token = create_access_token(identity=str(user.id))
+    
+    # NEW FEATURE: Login Alert Email Notification
+    try:
+        timestamp = datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC')
+        msg = Message("SmartClassifieds - New Login Security Alert", recipients=[user.email])
+        msg.body = (
+            f"Hello {user.username},\n\n"
+            f"This is a automated security notification confirming a successful new log in "
+            f"to your account parameters on {timestamp}.\n\n"
+            f"If this connection signature was initialized by you, no further action is necessary. "
+            f"If you did not authorize this authorization request, please modify your password immediately."
+        )
+        mail.send(msg)
+        print(f"[MAIL LOG] Sent Login Notification Confirmation Alert cleanly to {user.email}")
+    except Exception as e:
+        # Prevents network/SMTP routing failures from throwing a fake 403 CORS crash
+        print(f"[MAIL ERROR - BYPASSING CRASH] Login notification failed to send via network: {e}")
+
     return jsonify({
         "token": access_token,
         "user": user.to_dict()
